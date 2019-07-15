@@ -1,0 +1,31 @@
+@import url("https://fonts.googleapis.com/icon?family=Material+Icons");
+
+header {
+  background-color: #4a90e2;
+}
+
+nav {
+  padding: 10px 30px;
+  display: flex;
+  justify-content: space-between;
+}
+
+nav > img {
+  height: 24px;
+}
+
+header .profile-menu {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  color: white;
+}
+
+header .profile-menu > span {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+header .profile-menu i {
+  margin-left: 10px;
+}
