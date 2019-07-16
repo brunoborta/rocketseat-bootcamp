@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
 import { FaGithubAlt, FaPlus, FaSpinner } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 import api from '../../services/api';
 
-import { Container, Form, SubmitButton } from './styles';
+import Container from '../../components/Container';
+import { Form, SubmitButton, List } from './styles';
 
 class Main extends Component {
   state = {
@@ -11,6 +13,22 @@ class Main extends Component {
     repositories: [],
     loading: false,
   };
+
+  // Carrega os dados do LocalStorage
+  componentDidMount() {
+    const repositories = localStorage.getItem('repositories');
+
+    if (repositories) {
+      this.setState({ repositories: JSON.parse(repositories) });
+    }
+  }
+
+  componentDidUpdate(_, prevState) {
+    const { repositories } = this.state;
+    if (prevState.repositories !== repositories) {
+      localStorage.setItem('repositories', JSON.stringify(repositories));
+    }
+  }
 
   handleInputChange = event => {
     this.setState({ newRepo: event.target.value });
@@ -36,7 +54,7 @@ class Main extends Component {
   };
 
   render() {
-    const { newRepo, loading } = this.state;
+    const { newRepo, repositories, loading } = this.state;
     return (
       <Container>
         <h1>
@@ -52,7 +70,7 @@ class Main extends Component {
             name="repo"
             onChange={this.handleInputChange}
           />
-          <SubmitButton loading={loading}>
+          <SubmitButton loading={loading ? 1 : 0}>
             {loading ? (
               <FaSpinner color="#FFF" size={14} />
             ) : (
@@ -60,6 +78,16 @@ class Main extends Component {
             )}
           </SubmitButton>
         </Form>
+        <List>
+          {repositories.map(repo => (
+            <li key={repo.name}>
+              <span>{repo.name}</span>
+              <Link to={`/repository/${encodeURIComponent(repo.name)}`}>
+                Detalhes
+              </Link>
+            </li>
+          ))}
+        </List>
       </Container>
     );
   }
