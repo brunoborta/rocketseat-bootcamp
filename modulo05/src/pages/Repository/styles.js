@@ -1,19 +1,33 @@
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
+
+const rotate = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+`;
 
 export const Loading = styled.div`
-  color: #fff;
-  font-size: 30px;
-  font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100vh;
+
+  svg {
+    animation: ${rotate} 2s linear infinite;
+  }
 `;
 
 export const Owner = styled.header`
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding-bottom: 30px;
+  margin-bottom: 30px;
+  border-bottom: 1px solid #eee;
 
   a {
     color: #7159c1;
@@ -42,9 +56,6 @@ export const Owner = styled.header`
   }
 `;
 export const IssueList = styled.ul`
-  padding-top: 30px;
-  margin-top: 30px;
-  border-top: 1px solid #eee;
   list-style: none;
 
   li {
@@ -97,6 +108,42 @@ export const IssueList = styled.ul`
       margin-top: 5px;
       font-size: 12px;
       color: #999;
+    }
+  }
+`;
+
+export const Filter = styled.select`
+  margin-bottom: 5px;
+  padding: 10px 15px;
+  font-size: 16px;
+  background-color: #fff;
+`;
+
+export const Buttons = styled.div`
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  button {
+    padding: 10px;
+    border-radius: 4px;
+    background-color: #7159c1;
+    color: #fff;
+    font-weight: bold;
+    border: 0;
+    box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    & + button {
+      margin-left: 10px;
+    }
+
+    &[disabled] {
+      cursor: not-allowed;
+      opacity: 0.6;
     }
   }
 `;
