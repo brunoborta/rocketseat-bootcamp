@@ -5,13 +5,15 @@ import { Link } from 'react-router-dom';
 import api from '../../services/api';
 
 import Container from '../../components/Container';
-import { Form, SubmitButton, List } from './styles';
+import { Form, SubmitButton, List, ErrorMessage } from './styles';
 
 class Main extends Component {
   state = {
     newRepo: '',
     repositories: [],
     loading: false,
+    error: false,
+    errorMessage: null,
   };
 
   // Carrega os dados do LocalStorage
@@ -35,26 +37,38 @@ class Main extends Component {
   };
 
   handleSubmit = async event => {
-    event.preventDefault();
-    const { newRepo, repositories } = this.state;
+    try {
+      this.setState({ loading: true, error: false, errorMessage: null });
+      event.preventDefault();
 
-    this.setState({ loading: true });
+      const { newRepo, repositories } = this.state;
 
-    const response = await api.get(`repos/${newRepo}`);
+      if (repositories.find(repository => repository.name === newRepo)) {
+        throw new Error('Repositório duplicado!');
+      }
 
-    const data = {
-      name: response.data.full_name,
-    };
-
-    this.setState({
-      repositories: [...repositories, data],
-      newRepo: '',
-      loading: false,
-    });
+      const response = await api.get(`repos/${newRepo}`);
+      const data = {
+        name: response.data.full_name,
+      };
+      this.setState({
+        repositories: [...repositories, data],
+        newRepo: '',
+      });
+    } catch (err) {
+      this.setState({
+        error: true,
+        errorMessage: err.message,
+      });
+    } finally {
+      this.setState({
+        loading: false,
+      });
+    }
   };
 
   render() {
-    const { newRepo, repositories, loading } = this.state;
+    const { newRepo, repositories, loading, error, errorMessage } = this.state;
     return (
       <Container>
         <h1>
@@ -62,7 +76,7 @@ class Main extends Component {
           Repositórios
         </h1>
 
-        <Form onSubmit={this.handleSubmit}>
+        <Form onSubmit={this.handleSubmit} error={error ? 1 : 0}>
           <input
             type="text"
             value={newRepo}
@@ -78,6 +92,7 @@ class Main extends Component {
             )}
           </SubmitButton>
         </Form>
+        {error && errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
         <List>
           {repositories.map(repo => (
             <li key={repo.name}>
