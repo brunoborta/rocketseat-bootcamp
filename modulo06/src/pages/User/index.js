@@ -16,6 +16,7 @@ import {
   Info,
   Title,
   Author,
+  Loading,
 } from './styles';
 
 export default class User extends Component {
@@ -31,7 +32,11 @@ export default class User extends Component {
   };
 
   state = {
+    user: {},
     stars: [],
+    loading: true,
+    currentPage: 1,
+    refreshing: false,
   };
 
   // console.tron.log(navigation.getParams('user'));
@@ -42,7 +47,9 @@ export default class User extends Component {
     const response = await api.get(`/users/${user.login}/starred`);
 
     this.setState({
+      user,
       stars: response.data,
+      loading: false,
     });
   }
 
@@ -51,9 +58,34 @@ export default class User extends Component {
     navigation.navigate('Repository', { repository });
   };
 
+  loadMore = async () => {
+    const { user, currentPage, stars } = this.state;
+
+    const response = await api.get(`/users/${user.login}/starred`, {
+      params: {
+        page: currentPage + 1,
+      },
+    });
+
+    this.setState({
+      currentPage: currentPage + 1,
+      stars: [...stars, ...response.data],
+    });
+  };
+
+  refreshList = async () => {
+    const { user } = this.state;
+    const response = await api.get(`/users/${user.login}/starred`);
+
+    this.setState({
+      currentPage: 1,
+      stars: response.data,
+    });
+  };
+
   render() {
     const { navigation } = this.props;
-    const { stars } = this.state;
+    const { stars, loading, refreshing } = this.state;
 
     const user = navigation.getParam('user');
 
@@ -64,22 +96,29 @@ export default class User extends Component {
           <Name>{user.name}</Name>
           <Bio>{user.bio}</Bio>
         </Header>
-
-        <Stars
-          data={stars}
-          keyExtractor={star => String(star.id)}
-          renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => this.handleNavigate(item)}>
-              <Starred>
-                <OwnerAvatar source={{ uri: item.owner.avatar_url }} />
-                <Info>
-                  <Title>{item.name}</Title>
-                  <Author>{item.owner.login}</Author>
-                </Info>
-              </Starred>
-            </TouchableOpacity>
-          )}
-        />
+        {loading ? (
+          <Loading />
+        ) : (
+          <Stars
+            onEndReachedThreshold={0.2}
+            onEndReached={this.loadMore}
+            onRefresh={this.refreshList}
+            refreshing={refreshing}
+            data={stars}
+            keyExtractor={star => String(star.id)}
+            renderItem={({ item }) => (
+              <TouchableOpacity onPress={() => this.handleNavigate(item)}>
+                <Starred>
+                  <OwnerAvatar source={{ uri: item.owner.avatar_url }} />
+                  <Info>
+                    <Title>{item.name}</Title>
+                    <Author>{item.owner.login}</Author>
+                  </Info>
+                </Starred>
+              </TouchableOpacity>
+            )}
+          />
+        )}
       </Container>
     );
   }
